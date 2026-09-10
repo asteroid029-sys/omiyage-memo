@@ -18,6 +18,7 @@ const filterEmptyState = $('filterEmptyState');
 const dialog = $('editorDialog');
 const form = $('souvenirForm');
 const confirmDialog = $('confirmDialog');
+const photoDialog = $('photoDialog');
 
 function openDb() {
   return new Promise((resolve, reject) => {
@@ -176,6 +177,19 @@ function renderItem(item) {
   if (item.photoData) {
     img.src = item.photoData;
     img.hidden = false;
+    img.classList.add('is-expandable');
+    img.setAttribute('role', 'button');
+    img.setAttribute('tabindex', '0');
+    img.setAttribute('aria-label', `${item.name}の写真を拡大表示`);
+    const openPhoto = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      showPhoto(item);
+    };
+    img.addEventListener('click', openPhoto);
+    img.addEventListener('keydown', event => {
+      if (event.key === 'Enter' || event.key === ' ') openPhoto(event);
+    });
   } else {
     img.hidden = true;
   }
@@ -213,6 +227,19 @@ function renderItem(item) {
   node.querySelector('.card-main').addEventListener('click', () => openEditor(item));
   node.querySelector('.delete-button').addEventListener('click', () => askDelete(item.id));
   return node;
+}
+
+function showPhoto(item) {
+  if (!item?.photoData) return;
+  $('photoFull').src = item.photoData;
+  $('photoFull').alt = `${item.name}の写真`;
+  $('photoCaption').textContent = item.name || '';
+  photoDialog.showModal();
+}
+
+function closePhoto() {
+  photoDialog.close();
+  $('photoFull').removeAttribute('src');
 }
 
 function openEditor(item = null) {
@@ -387,6 +414,10 @@ $('tagInput').addEventListener('keydown', (event) => {
 });
 
 $('cancelButton').addEventListener('click', closeEditor);
+$('closePhotoButton').addEventListener('click', closePhoto);
+photoDialog.addEventListener('click', event => {
+  if (event.target === photoDialog) closePhoto();
+});
 $('addButton').addEventListener('click', () => openEditor());
 $('fab').addEventListener('click', () => openEditor());
 $('emptyAddButton').addEventListener('click', () => openEditor());

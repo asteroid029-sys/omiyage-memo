@@ -127,3 +127,16 @@ h1 { margin:0; font-size:28px; letter-spacing:-.04em; }
   .thumb-wrap { width:62px; height:62px; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; transition:none !important; } }
+
+/* v3: photo viewer + installed-app polish */
+.thumb.is-expandable { cursor: zoom-in; }
+.photo-dialog { width:100vw; max-width:none; height:100dvh; max-height:none; margin:0; padding:0; border:0; background:rgba(20,18,16,.96); }
+.photo-dialog::backdrop { background:rgba(20,18,16,.96); }
+.photo-viewer { position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; padding:calc(64px + env(safe-area-inset-top)) 18px calc(62px + env(safe-area-inset-bottom)); }
+.photo-viewer img { max-width:100%; max-height:100%; object-fit:contain; border-radius:12px; }
+.photo-close { position:absolute; top:calc(14px + env(safe-area-inset-top)); right:16px; width:44px; height:44px; border:0; border-radius:50%; background:rgba(255,255,255,.14); color:#fff; font-size:30px; line-height:1; display:grid; place-items:center; cursor:pointer; }
+.photo-caption { position:absolute; left:18px; right:70px; bottom:calc(16px + env(safe-area-inset-bottom)); margin:0; color:#fff; font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+@media (display-mode: standalone) {
+  body { overscroll-behavior-y: none; }
+  .app-shell { padding-top:calc(12px + env(safe-area-inset-top)); }
+}

@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#fff8ef" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <title>おみやげメモ</title>
   <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon-180.png" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -145,6 +147,15 @@
         </label>
       </div>
     </form>
+  </dialog>
+
+
+  <dialog id="photoDialog" class="photo-dialog">
+    <div class="photo-viewer">
+      <button id="closePhotoButton" class="photo-close" type="button" aria-label="写真を閉じる">×</button>
+      <img id="photoFull" alt="お土産の写真" />
+      <p id="photoCaption" class="photo-caption"></p>
+    </div>
   </dialog>
 
   <dialog id="confirmDialog" class="confirm-dialog">

@@ -1,41 +1,33 @@
-# おみやげメモ
+# おみやげメモ v2
 
-スマホ向けの個人用お土産リストPWAです。データはブラウザのIndexedDBに保存するため、アプリ用サーバーやDBは不要です。
+スマホ向け・個人利用用のお土産買い物リストPWAです。データは端末内のIndexedDBに保存します。
 
-## 機能
-- お土産の追加・編集・削除
-- 名前、場所、GoogleマップURL、写真、予想金額、備考メモ
-- 購入済みチェック
-- すべて / 未購入 / 購入済みの絞り込み
-- 購入数の進捗と予想金額合計
-- 写真は端末側で最大1200px程度に圧縮して保存
-- Service Workerによるオフライン利用
+## v2 改善点
 
-## いちばん簡単な公開方法
-このフォルダをそのまま静的ホスティングに置きます。GitHub Pages / Cloudflare Pages / Netlify / Vercel などで動作します。
+- 写真選択をカメラ固定からギャラリー/ファイル選択へ変更
+- 日本円とは別に現地通貨の金額を登録可能（EURを初期値に設定、為替換算なし）
+- 購入済みカードは打ち消し線を使わず、背景色・左ライン・購入済みバッジで区別
+- 「買える場所」からGoogleマップ検索を直接起動可能
+- 自由タグを作成可能。トップ画面でタグ絞り込み可能
+- 現地通貨の合計を通貨ごとに表示
 
-アプリ本体のサーバー処理はありません。HTML/CSS/JSを配信するだけです。
+## Googleマップについて
 
-## スマホでアプリっぽく使う
-Safari / Chromeで公開URLを開き、「ホーム画面に追加」します。PWAとして単独画面で起動できます。
+通常のWebアプリからGoogleマップアプリでユーザーが選択した場所を、そのまま自動でWebアプリへ受け戻して登録することはできません（Maps API等を使った別実装が必要です）。
 
-## データ保存について
-データはその端末・そのブラウザ内のIndexedDBに保存されます。別端末との同期はされません。また、ブラウザデータを消すと登録内容も消えます。
+このバージョンでは、場所名を入力して「Googleマップで場所を探す」を押すと、その場所名でGoogleマップを開きます。一覧からも同じ場所をGoogleマップで再度開けます。
 
-## 将来、端末間同期したい場合
-Supabaseを追加する構成が簡単です。
+## 更新方法（GitHub Pages）
 
-テーブル例: souvenirs
-- id: uuid
-- user_id: uuid
-- name: text
-- place: text
-- map_url: text
-- photo_url: text
-- price: integer
-- memo: text
-- done: boolean
-- created_at: timestamptz
-- updated_at: timestamptz
+GitHubリポジトリ内の `index.html` / `styles.css` / `app.js` / `sw.js` をこのv2ファイルで置き換えてください。`manifest.webmanifest` は変更なしでも動作します。
 
-写真はSupabase Storageへ保存し、ログインはMagic LinkやGoogleログインにすると個人利用でも扱いやすいです。
+Service Workerのキャッシュ名をv2に更新しているため、公開後に古い画面が残る場合はページを一度閉じて開き直してください。
+
+## v3 updates
+- Tap a souvenir thumbnail to open a full-screen photo viewer.
+- Added app icons (180/192/512 and maskable 512) for Home Screen / PWA install.
+- Manifest now includes id, scope, standalone display, portrait orientation, and icon definitions.
+- Service Worker cache version updated to v3.
+
+### Important after updating from an older Home Screen shortcut
+If the old shortcut still opens with the browser address/search bar, remove that shortcut once, open the GitHub Pages URL in Chrome, reload it, then use **Add to Home screen / Install app** again. Existing IndexedDB souvenir data normally remains as long as you do not clear the site's storage.
