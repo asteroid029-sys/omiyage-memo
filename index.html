@@ -22,24 +22,32 @@
 
     <main>
       <section class="summary-card" aria-label="購入状況">
-        <div>
-          <span class="summary-label">買えたもの</span>
-          <strong id="progressText">0 / 0</strong>
+        <div class="summary-top">
+          <div>
+            <span class="summary-label">買えたもの</span>
+            <strong id="progressText">0 / 0</strong>
+          </div>
+          <div class="summary-total">
+            <span>予想合計</span>
+            <strong id="totalPrice">¥0</strong>
+          </div>
         </div>
         <div class="progress-track" aria-hidden="true">
           <div id="progressBar" class="progress-bar"></div>
         </div>
-        <div class="summary-bottom">
-          <span>予想合計</span>
-          <strong id="totalPrice">¥0</strong>
-        </div>
+        <div id="localTotals" class="local-totals" hidden></div>
       </section>
 
-      <nav class="filter-tabs" aria-label="表示切替">
+      <nav class="filter-tabs" aria-label="購入状況で絞り込み">
         <button class="filter-tab active" data-filter="all">すべて</button>
         <button class="filter-tab" data-filter="todo">未購入</button>
         <button class="filter-tab" data-filter="done">購入済み</button>
       </nav>
+
+      <section id="tagFilterSection" class="tag-filter-section" hidden aria-label="タグで絞り込み">
+        <div class="section-caption">タグ</div>
+        <div id="tagFilters" class="tag-filter-scroll"></div>
+      </section>
 
       <section id="list" class="souvenir-list" aria-live="polite"></section>
 
@@ -48,6 +56,12 @@
         <h2>まだお土産がありません</h2>
         <p>気になるものを見つけたら、写真や買える場所と一緒にメモしておきましょう。</p>
         <button id="emptyAddButton" class="button primary-button">最初のお土産を追加</button>
+      </section>
+
+      <section id="filterEmptyState" class="empty-state compact" hidden>
+        <div class="empty-icon">🔎</div>
+        <h2>該当するお土産がありません</h2>
+        <p>購入状況やタグの絞り込みを変えてみてください。</p>
       </section>
     </main>
 
@@ -66,37 +80,64 @@
       <div class="form-body">
         <label class="field">
           <span>名前 <em>必須</em></span>
-          <input id="nameInput" name="name" required maxlength="80" placeholder="例：いちご大福" />
+          <input id="nameInput" name="name" required maxlength="80" placeholder="例：バタークッキー" />
         </label>
 
         <div class="field">
           <span>写真</span>
           <label class="photo-picker" for="photoInput">
             <img id="photoPreview" alt="選択した写真のプレビュー" hidden />
-            <span id="photoPlaceholder">📷 写真を選ぶ</span>
+            <span id="photoPlaceholder">🖼️ ギャラリーから写真を選ぶ</span>
           </label>
-          <input id="photoInput" type="file" accept="image/*" capture="environment" hidden />
+          <input id="photoInput" type="file" accept="image/*" hidden />
           <button id="removePhotoButton" type="button" class="small-link" hidden>写真を削除</button>
         </div>
 
-        <label class="field">
+        <div class="field">
           <span>買える場所</span>
-          <input id="placeInput" name="place" maxlength="120" placeholder="例：東京駅 グランスタ" />
-        </label>
+          <input id="placeInput" name="place" maxlength="120" placeholder="例：Galeries Lafayette Paris Haussmann" />
+          <button id="openMapSearchButton" type="button" class="secondary-action">⌖ Googleマップで場所を探す</button>
+          <small>入力した場所名でGoogleマップを開きます。マップ側で選んだ場所を自動で戻すことはできないため、場所名はこの欄に保存します。</small>
+        </div>
 
-        <label class="field">
-          <span>GoogleマップURL</span>
-          <input id="mapUrlInput" name="mapUrl" inputmode="url" placeholder="https://maps.google.com/..." />
-          <small>マップの「共有」からURLを貼り付ければ、一覧からすぐ開けます。</small>
-        </label>
-
-        <label class="field">
+        <div class="field">
           <span>予想金額</span>
-          <div class="price-input-wrap">
-            <span>¥</span>
-            <input id="priceInput" name="price" inputmode="numeric" pattern="[0-9]*" placeholder="1500" />
+          <div class="price-grid">
+            <label class="mini-field">
+              <span>日本円（任意）</span>
+              <div class="price-input-wrap">
+                <span>¥</span>
+                <input id="priceInput" name="price" inputmode="numeric" pattern="[0-9]*" placeholder="1500" />
+              </div>
+            </label>
+            <label class="mini-field">
+              <span>現地通貨</span>
+              <div class="local-price-wrap">
+                <input id="localPriceInput" name="localPrice" inputmode="decimal" placeholder="12.50" />
+                <select id="currencyInput" name="currency" aria-label="現地通貨">
+                  <option value="EUR" selected>EUR €</option>
+                  <option value="GBP">GBP £</option>
+                  <option value="USD">USD $</option>
+                  <option value="CHF">CHF</option>
+                  <option value="KRW">KRW ₩</option>
+                  <option value="TWD">TWD NT$</option>
+                  <option value="THB">THB ฿</option>
+                </select>
+              </div>
+            </label>
           </div>
-        </label>
+          <small>為替換算は行いません。日本円と現地通貨は別々に記録します。</small>
+        </div>
+
+        <div class="field">
+          <span>タグ</span>
+          <div class="tag-input-row">
+            <input id="tagInput" maxlength="30" placeholder="例：フランス" />
+            <button id="addTagButton" type="button" class="secondary-action compact-button">追加</button>
+          </div>
+          <div id="editorTags" class="editor-tags" aria-live="polite"></div>
+          <small>国名・渡す相手・カテゴリなど、好きなタグを自由に作れます。</small>
+        </div>
 
         <label class="field">
           <span>備考メモ</span>
@@ -123,16 +164,21 @@
       <button class="card-main" type="button" aria-label="お土産を編集">
         <div class="thumb-wrap"><img class="thumb" alt="" /></div>
         <div class="card-copy">
-          <h3 class="item-name"></h3>
-          <p class="item-place"></p>
-          <div class="meta-row">
-            <span class="item-price"></span>
-            <span class="item-memo"></span>
+          <div class="name-row">
+            <h3 class="item-name"></h3>
+            <span class="done-badge">購入済み</span>
           </div>
+          <p class="item-place"></p>
+          <div class="price-row">
+            <span class="item-price"></span>
+            <span class="item-local-price"></span>
+          </div>
+          <div class="item-tags"></div>
+          <p class="item-memo"></p>
         </div>
       </button>
       <div class="card-actions">
-        <a class="map-button" target="_blank" rel="noopener" aria-label="Googleマップで開く">↗</a>
+        <a class="map-button" target="_blank" rel="noopener" aria-label="Googleマップで開く">⌖</a>
         <button class="delete-button" type="button" aria-label="削除">⋯</button>
       </div>
     </article>

@@ -5,13 +5,16 @@ const DB_VERSION = 1;
 let db;
 let items = [];
 let currentFilter = 'all';
+let currentTag = 'all';
 let editingId = null;
 let pendingDeleteId = null;
 let currentPhotoData = '';
+let currentEditorTags = [];
 
 const $ = (id) => document.getElementById(id);
 const listEl = $('list');
 const emptyState = $('emptyState');
+const filterEmptyState = $('filterEmptyState');
 const dialog = $('editorDialog');
 const form = $('souvenirForm');
 const confirmDialog = $('confirmDialog');
@@ -63,6 +66,18 @@ function formatYen(value) {
   return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(n);
 }
 
+function formatLocal(value, currency = 'EUR') {
+  const n = Number(value || 0);
+  if (!n) return '';
+  try {
+    return new Intl.NumberFormat('ja-JP', {
+      style: 'currency', currency, minimumFractionDigits: 0, maximumFractionDigits: 2
+    }).format(n);
+  } catch {
+    return `${currency} ${n.toLocaleString('ja-JP', { maximumFractionDigits: 2 })}`;
+  }
+}
+
 function sanitizeMapUrl(url) {
   if (!url) return '';
   try {
@@ -71,21 +86,85 @@ function sanitizeMapUrl(url) {
   } catch { return ''; }
 }
 
+function makeMapSearchUrl(place) {
+  if (!place) return '';
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
+}
+
+function getItemTags(item) {
+  return Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
+}
+
+function getAllTags() {
+  return [...new Set(items.flatMap(getItemTags))].sort((a, b) => a.localeCompare(b, 'ja'));
+}
+
+function renderTagFilters() {
+  const tags = getAllTags();
+  const section = $('tagFilterSection');
+  const wrap = $('tagFilters');
+  section.hidden = tags.length === 0;
+  wrap.innerHTML = '';
+
+  if (!tags.includes(currentTag) && currentTag !== 'all') currentTag = 'all';
+
+  const choices = ['all', ...tags];
+  choices.forEach(tag => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'tag-filter-chip';
+    button.classList.toggle('active', tag === currentTag);
+    button.textContent = tag === 'all' ? 'すべて' : `#${tag}`;
+    button.addEventListener('click', () => {
+      currentTag = tag;
+      render();
+    });
+    wrap.appendChild(button);
+  });
+}
+
 function render() {
+  renderTagFilters();
+
   const visible = items
     .filter(item => currentFilter === 'all' || (currentFilter === 'done' ? item.done : !item.done))
+    .filter(item => currentTag === 'all' || getItemTags(item).includes(currentTag))
     .sort((a, b) => Number(a.done) - Number(b.done) || b.updatedAt - a.updatedAt);
 
   listEl.innerHTML = '';
   visible.forEach(item => listEl.appendChild(renderItem(item)));
 
   emptyState.hidden = items.length !== 0;
-  listEl.hidden = items.length === 0;
+  const noFilteredItems = items.length > 0 && visible.length === 0;
+  filterEmptyState.hidden = !noFilteredItems;
+  listEl.hidden = items.length === 0 || noFilteredItems;
 
   const doneCount = items.filter(i => i.done).length;
   $('progressText').textContent = `${doneCount} / ${items.length}`;
   $('progressBar').style.width = items.length ? `${(doneCount / items.length) * 100}%` : '0%';
   $('totalPrice').textContent = formatYen(items.reduce((sum, item) => sum + Number(item.price || 0), 0));
+
+  const currencyTotals = new Map();
+  items.forEach(item => {
+    const amount = Number(item.localPrice || 0);
+    if (!amount) return;
+    const currency = item.currency || 'EUR';
+    currencyTotals.set(currency, (currencyTotals.get(currency) || 0) + amount);
+  });
+
+  const localTotals = $('localTotals');
+  localTotals.innerHTML = '';
+  if (currencyTotals.size) {
+    localTotals.hidden = false;
+    [...currencyTotals.entries()].forEach(([currency, total]) => {
+      const pill = document.createElement('span');
+      pill.className = 'currency-total';
+      pill.textContent = `${currency}合計 ${formatLocal(total, currency)}`;
+      localTotals.appendChild(pill);
+    });
+  } else {
+    localTotals.hidden = true;
+  }
 }
 
 function renderItem(item) {
@@ -103,11 +182,20 @@ function renderItem(item) {
 
   node.querySelector('.item-name').textContent = item.name;
   node.querySelector('.item-place').textContent = item.place || '買える場所 未登録';
-  node.querySelector('.item-price').textContent = item.price ? formatYen(item.price) : '金額未登録';
+  node.querySelector('.item-price').textContent = item.price ? formatYen(item.price) : '';
+  node.querySelector('.item-local-price').textContent = item.localPrice ? formatLocal(item.localPrice, item.currency || 'EUR') : '';
   node.querySelector('.item-memo').textContent = item.memo || '';
 
+  const tagWrap = node.querySelector('.item-tags');
+  getItemTags(item).forEach(tag => {
+    const chip = document.createElement('span');
+    chip.className = 'item-tag';
+    chip.textContent = `#${tag}`;
+    tagWrap.appendChild(chip);
+  });
+
   const map = node.querySelector('.map-button');
-  const mapUrl = sanitizeMapUrl(item.mapUrl);
+  const mapUrl = sanitizeMapUrl(item.mapUrl) || makeMapSearchUrl(item.place);
   if (mapUrl) {
     map.href = mapUrl;
     map.hidden = false;
@@ -130,13 +218,17 @@ function renderItem(item) {
 function openEditor(item = null) {
   editingId = item?.id || null;
   currentPhotoData = item?.photoData || '';
+  currentEditorTags = [...getItemTags(item || {})];
   $('sheetTitle').textContent = item ? 'お土産を編集' : 'お土産を追加';
   $('nameInput').value = item?.name || '';
   $('placeInput').value = item?.place || '';
-  $('mapUrlInput').value = item?.mapUrl || '';
   $('priceInput').value = item?.price || '';
+  $('localPriceInput').value = item?.localPrice || '';
+  $('currencyInput').value = item?.currency || 'EUR';
   $('memoInput').value = item?.memo || '';
+  $('tagInput').value = '';
   updatePhotoPreview();
+  renderEditorTags();
   dialog.showModal();
   setTimeout(() => $('nameInput').focus(), 100);
 }
@@ -146,6 +238,7 @@ function closeEditor() {
   form.reset();
   editingId = null;
   currentPhotoData = '';
+  currentEditorTags = [];
 }
 
 function updatePhotoPreview() {
@@ -163,6 +256,36 @@ function updatePhotoPreview() {
     placeholder.hidden = false;
     remove.hidden = true;
   }
+}
+
+function renderEditorTags() {
+  const wrap = $('editorTags');
+  wrap.innerHTML = '';
+  currentEditorTags.forEach(tag => {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'editor-tag';
+    chip.innerHTML = `<span>#${escapeHtml(tag)}</span><span aria-hidden="true">×</span>`;
+    chip.setAttribute('aria-label', `${tag} タグを削除`);
+    chip.addEventListener('click', () => {
+      currentEditorTags = currentEditorTags.filter(t => t !== tag);
+      renderEditorTags();
+    });
+    wrap.appendChild(chip);
+  });
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+}
+
+function addTagFromInput() {
+  const input = $('tagInput');
+  const tag = input.value.trim().replace(/^#/, '').replace(/[,、]/g, '');
+  if (!tag) return;
+  if (!currentEditorTags.includes(tag)) currentEditorTags.push(tag);
+  input.value = '';
+  renderEditorTags();
 }
 
 function compressImage(file) {
@@ -202,16 +325,23 @@ form.addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!form.reportValidity()) return;
 
+  addTagFromInput();
+
   const existing = items.find(i => i.id === editingId);
   const priceRaw = $('priceInput').value.replace(/[^0-9]/g, '');
+  const localPriceRaw = $('localPriceInput').value.replace(',', '.').replace(/[^0-9.]/g, '');
   const now = Date.now();
   const item = {
     id: editingId || crypto.randomUUID(),
     name: $('nameInput').value.trim(),
     place: $('placeInput').value.trim(),
-    mapUrl: sanitizeMapUrl($('mapUrlInput').value.trim()),
+    // 旧バージョンのURLは編集後も保持し、既存データを壊さない
+    mapUrl: existing?.mapUrl || '',
     photoData: currentPhotoData,
     price: priceRaw ? Number(priceRaw) : 0,
+    localPrice: localPriceRaw ? Number(localPriceRaw) : 0,
+    currency: $('currencyInput').value || 'EUR',
+    tags: [...currentEditorTags],
     memo: $('memoInput').value.trim(),
     done: existing?.done || false,
     createdAt: existing?.createdAt || now,
@@ -234,6 +364,26 @@ $('removePhotoButton').addEventListener('click', () => {
   currentPhotoData = '';
   $('photoInput').value = '';
   updatePhotoPreview();
+});
+
+$('openMapSearchButton').addEventListener('click', () => {
+  const place = $('placeInput').value.trim();
+  if (!place) {
+    $('placeInput').focus();
+    $('placeInput').setCustomValidity('先に場所名を入力してください');
+    $('placeInput').reportValidity();
+    $('placeInput').setCustomValidity('');
+    return;
+  }
+  window.open(makeMapSearchUrl(place), '_blank', 'noopener');
+});
+
+$('addTagButton').addEventListener('click', addTagFromInput);
+$('tagInput').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' || event.key === ',') {
+    event.preventDefault();
+    addTagFromInput();
+  }
 });
 
 $('cancelButton').addEventListener('click', closeEditor);
