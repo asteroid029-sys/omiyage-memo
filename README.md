@@ -31,3 +31,10 @@ Service Workerのキャッシュ名をv2に更新しているため、公開後�
 
 ### Important after updating from an older Home Screen shortcut
 If the old shortcut still opens with the browser address/search bar, remove that shortcut once, open the GitHub Pages URL in Chrome, reload it, then use **Add to Home screen / Install app** again. Existing IndexedDB souvenir data normally remains as long as you do not clear the site's storage.
+
+
+## v4 の変更
+- 写真サムネイルを独立した操作領域にし、タップで写真ビューアを確実に開けるよう修正
+- 写真未登録時はアプリアイコンをプレースホルダーとして表示
+- 未入力の任意項目（場所、価格、現地価格、タグ、メモ）は一覧カードで非表示
+- Service Workerをnetwork-firstに変更し、更新を反映しやすく改善

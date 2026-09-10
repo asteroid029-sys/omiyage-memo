@@ -172,22 +172,26 @@
   <template id="itemTemplate">
     <article class="souvenir-card">
       <button class="check-button" aria-label="購入状態を変更"><span>✓</span></button>
-      <button class="card-main" type="button" aria-label="お土産を編集">
-        <div class="thumb-wrap"><img class="thumb" alt="" /></div>
-        <div class="card-copy">
-          <div class="name-row">
-            <h3 class="item-name"></h3>
-            <span class="done-badge">購入済み</span>
+      <div class="card-main">
+        <button class="thumb-button" type="button" aria-label="写真を表示">
+          <span class="thumb-wrap"><img class="thumb" alt="" /></span>
+        </button>
+        <button class="card-copy-button" type="button" aria-label="お土産を編集">
+          <div class="card-copy">
+            <div class="name-row">
+              <h3 class="item-name"></h3>
+              <span class="done-badge">購入済み</span>
+            </div>
+            <p class="item-place"></p>
+            <div class="price-row">
+              <span class="item-price"></span>
+              <span class="item-local-price"></span>
+            </div>
+            <div class="item-tags"></div>
+            <p class="item-memo"></p>
           </div>
-          <p class="item-place"></p>
-          <div class="price-row">
-            <span class="item-price"></span>
-            <span class="item-local-price"></span>
-          </div>
-          <div class="item-tags"></div>
-          <p class="item-memo"></p>
-        </div>
-      </button>
+        </button>
+      </div>
       <div class="card-actions">
         <a class="map-button" target="_blank" rel="noopener" aria-label="Googleマップで開く">⌖</a>
         <button class="delete-button" type="button" aria-label="削除">⋯</button>

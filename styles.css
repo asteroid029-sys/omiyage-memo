@@ -52,10 +52,14 @@ h1 { margin:0; font-size:28px; letter-spacing:-.04em; }
 .check-button span { opacity:0; font-weight:900; }
 .souvenir-card.done .check-button { border-color:var(--green); background:var(--green); }
 .souvenir-card.done .check-button span { opacity:1; }
-.card-main { min-width:0; border:0; background:transparent; display:grid; grid-template-columns:68px minmax(0,1fr); gap:12px; align-items:center; text-align:left; padding:0; cursor:pointer; }
+.card-main { min-width:0; display:grid; grid-template-columns:68px minmax(0,1fr); gap:12px; align-items:center; }
+.thumb-button { width:68px; height:68px; border:0; background:transparent; padding:0; border-radius:15px; cursor:default; }
+.thumb-button.is-expandable { cursor:zoom-in; }
+.thumb-button:disabled { opacity:1; }
+.card-copy-button { min-width:0; width:100%; border:0; background:transparent; padding:0; text-align:left; color:inherit; cursor:pointer; }
 .thumb-wrap { position:relative; width:68px; height:68px; border-radius:15px; overflow:hidden; background:var(--surface-soft); display:grid; place-items:center; }
-.thumb-wrap::before { content:"🎁"; position:absolute; font-size:22px; }
 .thumb { position:relative; width:100%; height:100%; object-fit:cover; display:block; transition:.2s ease; }
+.thumb.is-placeholder { object-fit:contain; padding:9px; background:#fff3e9; }
 .souvenir-card.done .thumb { filter:saturate(.72) contrast(.94); }
 .card-copy { min-width:0; }
 .name-row { display:flex; gap:7px; align-items:center; min-width:0; }
@@ -124,12 +128,11 @@ h1 { margin:0; font-size:28px; letter-spacing:-.04em; }
   .fab { display:grid; place-items:center; }
   .price-grid { grid-template-columns:1fr; }
   .card-main { grid-template-columns:62px minmax(0,1fr); gap:10px; }
-  .thumb-wrap { width:62px; height:62px; }
+  .thumb-button, .thumb-wrap { width:62px; height:62px; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; transition:none !important; } }
 
 /* v3: photo viewer + installed-app polish */
-.thumb.is-expandable { cursor: zoom-in; }
 .photo-dialog { width:100vw; max-width:none; height:100dvh; max-height:none; margin:0; padding:0; border:0; background:rgba(20,18,16,.96); }
 .photo-dialog::backdrop { background:rgba(20,18,16,.96); }
 .photo-viewer { position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; padding:calc(64px + env(safe-area-inset-top)) 18px calc(62px + env(safe-area-inset-bottom)); }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'omiyage-memo-v3';
+const CACHE_NAME = 'omiyage-memo-v4';
 const ASSETS = [
   './', './index.html', './styles.css', './app.js', './manifest.webmanifest',
   './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png'
@@ -18,19 +18,15 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match('./index.html'))
-    );
-    return;
-  }
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      const fresh = fetch(event.request).then(response => {
-        if (response.ok) caches.open(CACHE_NAME).then(cache => cache.put(event.request, response.clone()));
+    fetch(event.request)
+      .then(response => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
+        }
         return response;
-      }).catch(() => cached);
-      return cached || fresh;
-    })
+      })
+      .catch(() => caches.match(event.request).then(cached => cached || caches.match('./index.html')))
   );
 });

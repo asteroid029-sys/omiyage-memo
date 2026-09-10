@@ -174,39 +174,63 @@ function renderItem(item) {
   node.classList.toggle('done', item.done);
 
   const img = node.querySelector('.thumb');
+  const thumbButton = node.querySelector('.thumb-button');
   if (item.photoData) {
     img.src = item.photoData;
-    img.hidden = false;
-    img.classList.add('is-expandable');
-    img.setAttribute('role', 'button');
-    img.setAttribute('tabindex', '0');
-    img.setAttribute('aria-label', `${item.name}の写真を拡大表示`);
-    const openPhoto = (event) => {
+    img.classList.remove('is-placeholder');
+    img.alt = `${item.name}の写真`;
+    thumbButton.classList.add('is-expandable');
+    thumbButton.setAttribute('aria-label', `${item.name}の写真を拡大表示`);
+    thumbButton.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
       showPhoto(item);
-    };
-    img.addEventListener('click', openPhoto);
-    img.addEventListener('keydown', event => {
-      if (event.key === 'Enter' || event.key === ' ') openPhoto(event);
     });
   } else {
-    img.hidden = true;
+    img.src = './icon-192.png';
+    img.classList.add('is-placeholder');
+    img.alt = '';
+    thumbButton.classList.remove('is-expandable');
+    thumbButton.setAttribute('aria-label', '画像なし');
+    thumbButton.disabled = true;
   }
 
   node.querySelector('.item-name').textContent = item.name;
-  node.querySelector('.item-place').textContent = item.place || '買える場所 未登録';
-  node.querySelector('.item-price').textContent = item.price ? formatYen(item.price) : '';
-  node.querySelector('.item-local-price').textContent = item.localPrice ? formatLocal(item.localPrice, item.currency || 'EUR') : '';
-  node.querySelector('.item-memo').textContent = item.memo || '';
+
+  const placeEl = node.querySelector('.item-place');
+  if (item.place) {
+    placeEl.textContent = item.place;
+    placeEl.hidden = false;
+  } else {
+    placeEl.hidden = true;
+  }
+
+  const yenEl = node.querySelector('.item-price');
+  const localEl = node.querySelector('.item-local-price');
+  const priceRow = node.querySelector('.price-row');
+  yenEl.textContent = item.price ? formatYen(item.price) : '';
+  localEl.textContent = item.localPrice ? formatLocal(item.localPrice, item.currency || 'EUR') : '';
+  yenEl.hidden = !item.price;
+  localEl.hidden = !item.localPrice;
+  priceRow.hidden = !item.price && !item.localPrice;
 
   const tagWrap = node.querySelector('.item-tags');
-  getItemTags(item).forEach(tag => {
+  const tags = getItemTags(item);
+  tags.forEach(tag => {
     const chip = document.createElement('span');
     chip.className = 'item-tag';
     chip.textContent = `#${tag}`;
     tagWrap.appendChild(chip);
   });
+  tagWrap.hidden = tags.length === 0;
+
+  const memoEl = node.querySelector('.item-memo');
+  if (item.memo) {
+    memoEl.textContent = item.memo;
+    memoEl.hidden = false;
+  } else {
+    memoEl.hidden = true;
+  }
 
   const map = node.querySelector('.map-button');
   const mapUrl = sanitizeMapUrl(item.mapUrl) || makeMapSearchUrl(item.place);
@@ -224,7 +248,7 @@ function renderItem(item) {
     render();
   });
 
-  node.querySelector('.card-main').addEventListener('click', () => openEditor(item));
+  node.querySelector('.card-copy-button').addEventListener('click', () => openEditor(item));
   node.querySelector('.delete-button').addEventListener('click', () => askDelete(item.id));
   return node;
 }
