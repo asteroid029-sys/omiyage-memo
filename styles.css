@@ -30,20 +30,11 @@ button { color: inherit; }
   padding: calc(18px + env(safe-area-inset-top)) 18px calc(112px + env(safe-area-inset-bottom));
 }
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
-.brand-icon { width: 48px; height: 48px; border-radius: 14px; flex: 0 0 auto; }
-.brand-copy { min-width: 0; }
-h1 { margin: 0; font-size: 28px; line-height: 1.12; letter-spacing: -.045em; }
-.brand-copy p { margin: 4px 0 0; color: var(--subtle); font-size: 13px; font-weight: 650; }
-.icon-button { width: 46px; height: 46px; border-radius: 16px; border: 0; font-size: 28px; display: grid; place-items: center; cursor: pointer; }
-.icon-button.primary { background: var(--text); color: white; }
+.topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; }
+.eyebrow { margin:0 0 3px; color:var(--accent); font-size:10px; font-weight:800; letter-spacing:.16em; }
+h1 { margin:0; font-size:28px; letter-spacing:-.04em; }
+.icon-button { width:44px; height:44px; border-radius:15px; border:0; font-size:28px; display:grid; place-items:center; cursor:pointer; }
+.icon-button.primary { background:var(--text); color:white; }
 
 .summary-card {
   background: linear-gradient(145deg, #fff 0%, #fffbf7 100%);

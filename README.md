@@ -38,3 +38,7 @@ If the old shortcut still opens with the browser address/search bar, remove that
 - 写真未登録時はアプリアイコンをプレースホルダーとして表示
 - 未入力の任意項目（場所、価格、現地価格、タグ、メモ）は一覧カードで非表示
 - Service Workerをnetwork-firstに変更し、更新を反映しやすく改善
+
+
+## v6
+- v5 のカードUIは維持したまま、ヘッダーを v4 の「TRAVEL SHOPPING LIST / おみやげメモ」デザインに戻しました。
