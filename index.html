@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#fff8ef" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>おみやげメモ</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">TRAVEL SHOPPING LIST</p>
+        <h1>おみやげメモ</h1>
+      </div>
+      <button id="addButton" class="icon-button primary" aria-label="お土産を追加">＋</button>
+    </header>
+
+    <main>
+      <section class="summary-card" aria-label="購入状況">
+        <div>
+          <span class="summary-label">買えたもの</span>
+          <strong id="progressText">0 / 0</strong>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div class="summary-bottom">
+          <span>予想合計</span>
+          <strong id="totalPrice">¥0</strong>
+        </div>
+      </section>
+
+      <nav class="filter-tabs" aria-label="表示切替">
+        <button class="filter-tab active" data-filter="all">すべて</button>
+        <button class="filter-tab" data-filter="todo">未購入</button>
+        <button class="filter-tab" data-filter="done">購入済み</button>
+      </nav>
+
+      <section id="list" class="souvenir-list" aria-live="polite"></section>
+
+      <section id="emptyState" class="empty-state" hidden>
+        <div class="empty-icon">🎁</div>
+        <h2>まだお土産がありません</h2>
+        <p>気になるものを見つけたら、写真や買える場所と一緒にメモしておきましょう。</p>
+        <button id="emptyAddButton" class="button primary-button">最初のお土産を追加</button>
+      </section>
+    </main>
+
+    <button id="fab" class="fab" aria-label="お土産を追加">＋</button>
+  </div>
+
+  <dialog id="editorDialog" class="sheet-dialog">
+    <form id="souvenirForm" method="dialog" class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-header">
+        <button type="button" id="cancelButton" class="text-button">キャンセル</button>
+        <h2 id="sheetTitle">お土産を追加</h2>
+        <button type="submit" class="text-button save">保存</button>
+      </div>
+
+      <div class="form-body">
+        <label class="field">
+          <span>名前 <em>必須</em></span>
+          <input id="nameInput" name="name" required maxlength="80" placeholder="例：いちご大福" />
+        </label>
+
+        <div class="field">
+          <span>写真</span>
+          <label class="photo-picker" for="photoInput">
+            <img id="photoPreview" alt="選択した写真のプレビュー" hidden />
+            <span id="photoPlaceholder">📷 写真を選ぶ</span>
+          </label>
+          <input id="photoInput" type="file" accept="image/*" capture="environment" hidden />
+          <button id="removePhotoButton" type="button" class="small-link" hidden>写真を削除</button>
+        </div>
+
+        <label class="field">
+          <span>買える場所</span>
+          <input id="placeInput" name="place" maxlength="120" placeholder="例：東京駅 グランスタ" />
+        </label>
+
+        <label class="field">
+          <span>GoogleマップURL</span>
+          <input id="mapUrlInput" name="mapUrl" inputmode="url" placeholder="https://maps.google.com/..." />
+          <small>マップの「共有」からURLを貼り付ければ、一覧からすぐ開けます。</small>
+        </label>
+
+        <label class="field">
+          <span>予想金額</span>
+          <div class="price-input-wrap">
+            <span>¥</span>
+            <input id="priceInput" name="price" inputmode="numeric" pattern="[0-9]*" placeholder="1500" />
+          </div>
+        </label>
+
+        <label class="field">
+          <span>備考メモ</span>
+          <textarea id="memoInput" name="memo" rows="4" maxlength="500" placeholder="誰に渡すか、味、個数など"></textarea>
+        </label>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="confirmDialog" class="confirm-dialog">
+    <form method="dialog" class="confirm-card">
+      <h2>このお土産を削除しますか？</h2>
+      <p>削除すると元に戻せません。</p>
+      <div class="confirm-actions">
+        <button value="cancel" class="button">キャンセル</button>
+        <button id="confirmDeleteButton" value="delete" class="button danger-button">削除する</button>
+      </div>
+    </form>
+  </dialog>
+
+  <template id="itemTemplate">
+    <article class="souvenir-card">
+      <button class="check-button" aria-label="購入状態を変更"><span>✓</span></button>
+      <button class="card-main" type="button" aria-label="お土産を編集">
+        <div class="thumb-wrap"><img class="thumb" alt="" /></div>
+        <div class="card-copy">
+          <h3 class="item-name"></h3>
+          <p class="item-place"></p>
+          <div class="meta-row">
+            <span class="item-price"></span>
+            <span class="item-memo"></span>
+          </div>
+        </div>
+      </button>
+      <div class="card-actions">
+        <a class="map-button" target="_blank" rel="noopener" aria-label="Googleマップで開く">↗</a>
+        <button class="delete-button" type="button" aria-label="削除">⋯</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

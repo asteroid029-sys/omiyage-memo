@@ -1,0 +1,10 @@
+{
+  "name": "おみやげメモ",
+  "short_name": "おみやげメモ",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#fff8ef",
+  "theme_color": "#fff8ef",
+  "lang": "ja",
+  "description": "旅行先で買いたいお土産を写真・場所・金額と一緒に管理する個人用リスト"
+}
