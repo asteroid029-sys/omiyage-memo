@@ -92,6 +92,13 @@ function makeMapSearchUrl(place) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place)}`;
 }
 
+function hasMeaningfulText(value) {
+  const text = String(value || '').trim();
+  if (!text) return false;
+  const normalized = text.replace(/\s/g, '');
+  return !['未登録', '買える場所未登録', '登録なし', 'なし'].includes(normalized);
+}
+
 function getItemTags(item) {
   return Array.isArray(item.tags) ? item.tags.filter(Boolean) : [];
 }
@@ -186,6 +193,14 @@ function renderItem(item) {
       event.stopPropagation();
       showPhoto(item);
     });
+    img.addEventListener('error', () => {
+      img.src = './icon-192.png';
+      img.classList.add('is-placeholder');
+      img.alt = '';
+      thumbButton.classList.remove('is-expandable');
+      thumbButton.setAttribute('aria-label', '画像なし');
+      thumbButton.disabled = true;
+    }, { once: true });
   } else {
     img.src = './icon-192.png';
     img.classList.add('is-placeholder');
@@ -198,10 +213,11 @@ function renderItem(item) {
   node.querySelector('.item-name').textContent = item.name;
 
   const placeEl = node.querySelector('.item-place');
-  if (item.place) {
-    placeEl.textContent = item.place;
+  if (hasMeaningfulText(item.place)) {
+    placeEl.textContent = item.place.trim();
     placeEl.hidden = false;
   } else {
+    placeEl.textContent = '';
     placeEl.hidden = true;
   }
 
@@ -225,15 +241,16 @@ function renderItem(item) {
   tagWrap.hidden = tags.length === 0;
 
   const memoEl = node.querySelector('.item-memo');
-  if (item.memo) {
-    memoEl.textContent = item.memo;
+  if (hasMeaningfulText(item.memo)) {
+    memoEl.textContent = item.memo.trim();
     memoEl.hidden = false;
   } else {
+    memoEl.textContent = '';
     memoEl.hidden = true;
   }
 
   const map = node.querySelector('.map-button');
-  const mapUrl = sanitizeMapUrl(item.mapUrl) || makeMapSearchUrl(item.place);
+  const mapUrl = sanitizeMapUrl(item.mapUrl) || (hasMeaningfulText(item.place) ? makeMapSearchUrl(item.place) : '');
   if (mapUrl) {
     map.href = mapUrl;
     map.hidden = false;

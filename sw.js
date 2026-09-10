@@ -1,4 +1,4 @@
-const CACHE_NAME = 'omiyage-memo-v4';
+const CACHE_NAME = 'omiyage-memo-v5';
 const ASSETS = [
   './', './index.html', './styles.css', './app.js', './manifest.webmanifest',
   './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png'

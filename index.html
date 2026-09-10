@@ -15,9 +15,12 @@
 <body>
   <div class="app-shell">
     <header class="topbar">
-      <div>
-        <p class="eyebrow">TRAVEL SHOPPING LIST</p>
-        <h1>おみやげメモ</h1>
+      <div class="brand">
+        <img class="brand-icon" src="./icon-192.png" alt="" />
+        <div class="brand-copy">
+          <h1>おみやげメモ</h1>
+          <p>旅の思い出を、かたちに</p>
+        </div>
       </div>
       <button id="addButton" class="icon-button primary" aria-label="お土産を追加">＋</button>
     </header>
@@ -193,7 +196,9 @@
         </button>
       </div>
       <div class="card-actions">
-        <a class="map-button" target="_blank" rel="noopener" aria-label="Googleマップで開く">⌖</a>
+        <a class="map-button" target="_blank" rel="noopener" aria-label="Googleマップで開く">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.1 7-13A7 7 0 1 0 5 9c0 6.9 7 13 7 13Zm0-9.8A3.2 3.2 0 1 1 12 5.8a3.2 3.2 0 0 1 0 6.4Z"/></svg>
+        </a>
         <button class="delete-button" type="button" aria-label="削除">⋯</button>
       </div>
     </article>
